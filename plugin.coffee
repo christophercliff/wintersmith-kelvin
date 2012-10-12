@@ -5,45 +5,19 @@ async = require 'async'
 fs = require 'fs'
 
 module.exports = (wintersmith, callback) ->
+  
+  class KelvinPlugin extends wintersmith.ContentPlugin
 
-  class LessPlugin extends wintersmith.ContentPlugin
-
-    constructor: (@_filename, @_base, @_source) ->
+    constructor: (@_filename, @_base) ->
 
     getFilename: ->
-      @_filename.replace /less$/, 'css'
+      @_filename
 
     render: (locals, contents, templates, callback) ->
-      options =
-        filename: @_filename
-        paths: [path.dirname(path.join(@_base, @_filename))]
-      # less throws errors all over the place...
-      async.waterfall [
-        (callback) ->
-          try
-            parser = new less.Parser options
-            callback null, parser
-          catch error
-            callback error
-        (parser, callback) =>
-          try
-            parser.parse @_source, callback
-          catch error
-            callback error
-        (root, callback) ->
-          try
-            result = root.toCSS options
-            callback null, new Buffer result
-          catch error
-            callback error
-      ], callback
+      console.log(locals);
 
-  LessPlugin.fromFile = (filename, base, callback) ->
-    fs.readFile path.join(base, filename), (error, buffer) ->
-      if error
-        callback error
-      else
-        callback null, new LessPlugin filename, base, buffer.toString()
+  KelvinPlugin.fromFile = (filename, base, callback) ->
+    callback null, new KelvinPlugin filename
 
-  wintersmith.registerContentPlugin 'styles', '**/*.less', LessPlugin
+  wintersmith.registerContentPlugin 'assets', 'index.json', KelvinPlugin
   callback()
