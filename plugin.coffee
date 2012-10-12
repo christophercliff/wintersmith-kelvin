@@ -14,7 +14,8 @@ module.exports = (wintersmith, callback) ->
       @_filename
 
     render: (locals, contents, templates, callback) ->
-      console.log(locals);
+      console.log(1, locals);
+      console.log(2, contents.assets);
 
   KelvinPlugin.fromFile = (filename, base, callback) ->
     callback null, new KelvinPlugin filename
