@@ -1,12 +1,19 @@
 {
-  "css": {
-    "all": [
-      "./assets/css/*"
-    ]
-  },
-  "js": {
-    "all": [
-      "./assets/js/*"
-    ]
+  "assets": {
+    "css": {
+      "all": [
+        "./assets/css/*"
+      ]
+    },
+    "js": {
+      "all": [
+        "./assets/js/*"
+      ]
+    },
+    "jst": {
+      "all": [
+        "./assets/jst/*"
+      ]
+    }
   }
 }

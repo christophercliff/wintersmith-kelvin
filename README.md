@@ -10,27 +10,29 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
 - Versioned file names.
 - Compatible with CDN.
 
-## Overview
+## Usage
 
 1. Declare asset packages in an `assets.json` file located in the `./contents` directory.
 
 ```json
 {
-  "css": {
-    "all": [
-      "./assets/css/*"
-    ]
-  },
-  "js": {
-    "all": [
-      "./assets/js/*"
-    ]
-  },
-  "jst": {
+  "assets": {
+    "css": {
+      "all": [
+        "./assets/css/*"
+      ]
+    },
+    "js": {
+      "all": [
+        "./assets/js/*"
+      ]
+    },
+    "jst": {
       "all": [
         "./assets/jst/*"
       ]
     }
+  }
 }
 ````
 
@@ -45,3 +47,18 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
     </head>
 </html>
 ```
+
+## Development & Production Modes
+
+Preview server:
+
+- Reference individual files in template
+- Process LESS/CoffeeScript/Mustache into CSS & JavaScript
+- Hash file contents into version number and concat w/ querystring
+
+Production build:
+
+- Reference combined files in template
+- Convert images to data URIs
+- Hash file contents into version number and concat w/ filename
+- Minify HTML (https://github.com/xonecas/htmlKompressor)
