@@ -9,6 +9,8 @@
     "async": ">= 0.0.1",
     "coffee-script": "1.2.x",
     "nap": "0.6.2",
-    "hogan": "1.0.5-dev"
+    "hogan": "1.0.5-dev",
+    "underscore": "~1.4.2",
+    "moment": "~1.7.2"
   }
 }

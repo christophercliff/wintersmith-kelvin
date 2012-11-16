@@ -5,6 +5,7 @@ async = require 'async'
 fs = require 'fs'
 nap = require 'nap'
 hogan = require 'hogan'
+_ = require 'underscore'
 
 module.exports = (wintersmith, callback) ->
 
@@ -19,6 +20,7 @@ module.exports = (wintersmith, callback) ->
     constructor: (@tpl) ->
 
     render: (locals, callback) ->
+      
       try
         callback null, new Buffer @tpl.render(locals)
       catch error
@@ -34,7 +36,10 @@ module.exports = (wintersmith, callback) ->
         catch error
           callback error
 
-  class KelvinContent extends wintersmith.ContentPlugin
+  ###
+  Parse assets.json then process and write all of the assets.
+  ###
+  class KelvinAssets extends wintersmith.ContentPlugin
 
     constructor: (@_filename, @_base, @assets) ->
 
@@ -48,13 +53,39 @@ module.exports = (wintersmith, callback) ->
         preprocessPackage 'css', @assets.css
       return;
 
-  KelvinContent.fromFile = (filename, base, callback) ->
+  KelvinAssets.fromFile = (filename, base, callback) ->
     fs.readFile path.join(base, filename), (error, buffer) ->
       if error
-        callback erro
+        callback error
       else
-        callback null, new KelvinContent filename, base, JSON.parse(buffer.toString())
+        callback null, new KelvinAssets filename, base, JSON.parse(buffer.toString())
 
+  class KelvinJsonPage extends wintersmith.defaultPlugins.JsonPage
+    
+    render: (locals, contents, templates, callback) ->
+      if @template == 'none'
+        # dont render
+        return callback null, null
+
+      async.waterfall [
+        (callback) =>
+          template = templates[@template]
+          if not template?
+            callback new Error "page '#{ @filename }' specifies unknown template '#{ @template }'"
+          else
+            callback null, template
+        (template, callback) =>
+          ctx =
+            page: @
+            contents: contents
+            _: _
+            moment: require 'moment'
+          _.extend ctx, locals
+          template.render ctx, callback
+      ], callback
+
+  wintersmith.registerContentPlugin 'pages', '**/*.json', KelvinJsonPage
+  #wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
+  wintersmith.registerContentPlugin 'assets', 'assets.json', KelvinAssets
   wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
-  wintersmith.registerContentPlugin 'assets', 'assets.json', KelvinContent
   callback()
