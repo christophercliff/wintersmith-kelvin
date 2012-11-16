@@ -3,5 +3,10 @@
     "all": [
       "./assets/css/*"
     ]
+  },
+  "js": {
+    "all": [
+      "./assets/js/*"
+    ]
   }
 }

@@ -36,9 +36,6 @@ module.exports = (wintersmith, callback) ->
         catch error
           callback error
 
-  ###
-  Parse assets.json then process and write all of the assets.
-  ###
   class KelvinAssets extends wintersmith.ContentPlugin
 
     constructor: (@_filename, @_base, @assets) ->
@@ -80,9 +77,15 @@ module.exports = (wintersmith, callback) ->
             contents: contents
             _: _
             moment: require 'moment'
-          _.extend ctx, locals
+          _.extend ctx, locals, assets
           template.render ctx, callback
       ], callback
+
+  assets =
+    css:
+      all: '<link rel="text/css" href="test.css" />'
+    js:
+      all: '<script src="test.js"></script>'
 
   wintersmith.registerContentPlugin 'pages', '**/*.json', KelvinJsonPage
   #wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
