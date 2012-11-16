@@ -4,11 +4,11 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
 
 ## Features
 
-- Compiles and combines JavaScript, LESS and Mustache templates.
+- Concatenate and minify client-side JavaScript, CSS (LESS) and JavaScript templates (Mustache).
 - Separate modes for development and production.
 - Embed fonts and images in your CSS.
 - Versioned file names.
-- Compatible with your CDN.
+- Compatible with CDN.
 
 ## Overview
 
