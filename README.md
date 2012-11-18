@@ -61,4 +61,4 @@ Production build:
 - Reference combined files in template
 - Convert images to data URIs
 - Hash file contents into version number and concat w/ filename
-- Minify HTML (https://github.com/xonecas/htmlKompressor)
+- Minify HTML

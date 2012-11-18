@@ -6,9 +6,12 @@ fs = require 'fs'
 nap = require 'nap'
 hogan = require 'hogan'
 _ = require 'underscore'
+minify = require('html-minifier').minify
 
 module.exports = (wintersmith, callback) ->
-
+  
+  isProd = true
+  
   preprocessPackage = (type, package) ->
     for name, files of package
       for file in files
@@ -20,9 +23,13 @@ module.exports = (wintersmith, callback) ->
     constructor: (@tpl) ->
 
     render: (locals, callback) ->
-      
       try
-        callback null, new Buffer @tpl.render(locals)
+        rendered = @tpl.render(locals)
+        if isProd
+          rendered = minify rendered, {
+            collapseWhitespace: true
+          }
+        callback null, new Buffer rendered
       catch error
         callback error
 
@@ -63,7 +70,7 @@ module.exports = (wintersmith, callback) ->
       if @template == 'none'
         # dont render
         return callback null, null
-
+      
       async.waterfall [
         (callback) =>
           template = templates[@template]
