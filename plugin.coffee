@@ -10,7 +10,7 @@ minify = require('html-minifier').minify
 
 module.exports = (wintersmith, callback) ->
   
-  isProd = true
+  isProd = false
   
   preprocessPackage = (type, package) ->
     for name, files of package
@@ -70,7 +70,7 @@ module.exports = (wintersmith, callback) ->
       if @template == 'none'
         # dont render
         return callback null, null
-      
+
       async.waterfall [
         (callback) =>
           template = templates[@template]
@@ -84,18 +84,42 @@ module.exports = (wintersmith, callback) ->
             contents: contents
             _: _
             moment: require 'moment'
-          _.extend ctx, locals, assets
+          _.extend ctx, locals, parseAssets contents
           template.render ctx, callback
       ], callback
+  
+  class KelvinMarkdownPage extends wintersmith.defaultPlugins.MarkdownPage
 
-  assets =
-    css:
-      all: '<link rel="text/css" href="test.css" />'
-    js:
-      all: '<script src="test.js"></script>'
+    render: (locals, contents, templates, callback) ->
+      if @template == 'none'
+        # dont render
+        return callback null, null
+
+      async.waterfall [
+        (callback) =>
+          template = templates[@template]
+          if not template?
+            callback new Error "page '#{ @filename }' specifies unknown template '#{ @template }'"
+          else
+            callback null, template
+        (template, callback) =>
+          ctx =
+            page: @
+            contents: contents
+            _: _
+            moment: require 'moment'
+          _.extend ctx, locals, parseAssets contents
+          template.render ctx, callback
+      ], callback
+  
+  parseAssets = (contents) ->
+    assets = contents['assets.json']
+    unless assets
+      return
+    {}
 
   wintersmith.registerContentPlugin 'pages', '**/*.json', KelvinJsonPage
-  #wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
+  wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
   wintersmith.registerContentPlugin 'assets', 'assets.json', KelvinAssets
   wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
   callback()
