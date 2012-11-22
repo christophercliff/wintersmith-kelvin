@@ -7,10 +7,13 @@ nap = require 'nap'
 hogan = require 'hogan'
 _ = require 'underscore'
 minify = require('html-minifier').minify
+glob = require 'glob'
+Kelvin = require('./kelvin')
 
 module.exports = (wintersmith, callback) ->
   
   isProd = false
+  kelvin = new Kelvin(isProd)
   
   preprocessPackage = (type, package) ->
     for name, files of package
@@ -23,6 +26,8 @@ module.exports = (wintersmith, callback) ->
     constructor: (@tpl) ->
 
     render: (locals, callback) ->
+      if (locals.assets)
+        _.extend locals, kelvin.parse(locals)
       try
         rendered = @tpl.render(locals)
         if isProd
@@ -113,13 +118,38 @@ module.exports = (wintersmith, callback) ->
       ], callback
   
   parseAssets = (contents) ->
-    assets = contents['assets.json']
-    unless assets
+    config = contents['assets.json']['assets']['assets']
+    unless config
       return
+    config = expandAssetGlobs config
+    assets = {}
+    unless _.isEmpty(config.js)
+      assets.css = {}
+      for name, pkg of config.css
+        assets.css[name] = parsePackage pkg, 'css'
+    assets
+
+  parsePackage = (pkg, type) ->
+    console.log pkg, type
     {}
 
-  wintersmith.registerContentPlugin 'pages', '**/*.json', KelvinJsonPage
-  wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
-  wintersmith.registerContentPlugin 'assets', 'assets.json', KelvinAssets
+  expandAssetGlobs = (config) ->
+    assets = { js: {}, css: {}, jst: {} }
+    appDir = process.cwd().replace(/\\/g, '\/')
+    appDir += '/contents/'
+    for key, obj of config
+      for pkg, patterns of config[key]
+        matches = []
+        for pattern in patterns
+          fnd = glob.sync path.resolve("#{appDir}#{pattern}").replace(/\\/g, '\/')
+          matches = matches.concat(fnd)
+        matches = _.uniq _.flatten matches
+        matches = (file.replace(appDir, '').replace(/^\//, '') for file in matches)
+        assets[key][pkg] = matches
+    assets
+
+  #wintersmith.registerContentPlugin 'pages', '**/*.json', KelvinJsonPage
+  #wintersmith.registerContentPlugin 'pages', '**/*.*(markdown|mkd|md)', KelvinMarkdownPage
+  #wintersmith.registerContentPlugin 'assets', 'assets.json', KelvinAssets
   wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
   callback()

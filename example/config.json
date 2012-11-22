@@ -1,6 +1,22 @@
 {
   "plugins": ["./../"],
   "locals": {
-    "test": "chris"
+    "assets": {
+      "css": {
+        "all": [
+          "/assets/css/*"
+        ]
+      },
+      "js": {
+        "all": [
+          "/assets/js/*"
+        ]
+      },
+      "jst": {
+        "all": [
+          "/assets/jst/*"
+        ]
+      }
+    }
   }
 }

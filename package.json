@@ -12,6 +12,7 @@
     "hogan": "1.0.5-dev",
     "underscore": "~1.4.2",
     "moment": "~1.7.2",
-    "html-minifier": "0.4.5"
+    "html-minifier": "0.4.5",
+    "glob": "~3.1.14"
   }
 }
