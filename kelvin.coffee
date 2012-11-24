@@ -3,7 +3,6 @@ glob = require 'glob'
 path = require 'path'
 _ = require 'underscore'
 crypto = require 'crypto'
-nap = require 'nap'
 
 linkAttrs = {
   'href': '',
