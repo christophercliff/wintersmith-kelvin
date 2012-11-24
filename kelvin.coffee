@@ -3,6 +3,8 @@ glob = require 'glob'
 path = require 'path'
 _ = require 'underscore'
 crypto = require 'crypto'
+nap = require 'nap'
+fs = require 'fs'
 
 linkAttrs = {
   'href': '',
@@ -21,14 +23,16 @@ class Kelvin
 
   parse: (locals) ->
     if (@assets)
-      return @assets
+      return {
+        assets: @assets
+      }
     @assets = {}
     for type, obj of @expandAssetGlobs locals.assets
-      for pkg, arr of obj
+      for name, arr of obj
         if _.isArray arr
           unless @assets[type]
             @assets[type] = {}
-          @assets[type][pkg] = @processPackage arr, type
+          @assets[type][name] = @processPackage name, arr, type
     return {
       assets: @assets
     }
@@ -48,10 +52,27 @@ class Kelvin
         expandedAssets[key][pkg] = matches
     expandedAssets
 
-  processPackage: (files, type) ->
+  processPackage: (name, files, type) ->
     output = '\n'
     for file in files
-      output += link.join(' ')
+      contents = fs.readFileSync(path.resolve process.cwd() + '/contents/' + file).toString()
+      ext = path.extname file
+      if nap.preprocessors[ext]
+        contents = nap.preprocessors[ext] contents, file
+      filename = "/#{file}.#{hashContents(contents)}.css"
+      writeFile filename, contents
+      output += "<link href=\"#{filename}\" rel=\"stylesheet\" />\n"
     output
+
+hashContents = (contents) ->
+  md5 = crypto.createHash('md5')
+  md5.update contents
+  md5.digest('hex')
+
+writeFile = (filename, contents) =>
+  file = process.cwd() + '/build/' + filename
+  dir = path.dirname file
+  mkdirp.sync dir, '0755' unless path.existsSync dir
+  fs.writeFileSync file, contents ? ''
 
 module.exports = Kelvin
