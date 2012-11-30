@@ -37,7 +37,7 @@ module.exports = (wintersmith, callback) ->
         catch error
           callback error
 
-  class KelvinStyles extends wintersmith.ContentPlugin
+  class KelvinStylesheets extends wintersmith.ContentPlugin
 
     constructor: (@_filename, @_base, @_source) ->
       @_hash = Kelvin.hashContents(@_source)
@@ -53,13 +53,33 @@ module.exports = (wintersmith, callback) ->
         else
           callback null, new Buffer out
 
-  KelvinStyles.fromFile = (filename, base, callback) ->
+  KelvinStylesheets.fromFile = (filename, base, callback) ->
     fs.readFile path.join(base, filename), (error, buffer) ->
       if error
         callback error
       else
-        callback null, new KelvinStyles filename, base, buffer.toString()
+        callback null, new KelvinStylesheets filename, base, buffer.toString()
+
+  class KelvinJavaScripts extends wintersmith.ContentPlugin
+
+    constructor: (@_filename, @_base, @_source) ->
+      @_hash = Kelvin.hashContents(@_source)
+      return
+
+    getFilename: ->
+      Kelvin.formatFilename @_filename, @_hash, 'js'
+
+    render: (locals, contents, templates, callback) ->
+      callback null, new Buffer @_source
+
+  KelvinJavaScripts.fromFile = (filename, base, callback) ->
+    fs.readFile path.join(base, filename), (error, buffer) ->
+      if error
+        callback error
+      else
+        callback null, new KelvinJavaScripts filename, base, buffer.toString()
 
   wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
-  wintersmith.registerContentPlugin 'styles', '**/*.less', KelvinStyles
+  wintersmith.registerContentPlugin 'css', '**/*.less', KelvinStylesheets
+  wintersmith.registerContentPlugin 'js', '**/*.js', KelvinJavaScripts
   callback()
