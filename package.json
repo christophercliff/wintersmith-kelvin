@@ -6,7 +6,7 @@
   "license": "MIT",
   "dependencies": {
     "less": ">= 0.0.1",
-    "async": ">= 0.0.1",
+    "async": "~0.1.22",
     "coffee-script": "1.2.x",
     "nap": "0.6.2",
     "hogan": "1.0.5-dev",

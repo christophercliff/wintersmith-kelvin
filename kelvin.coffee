@@ -4,28 +4,18 @@ path = require 'path'
 _ = require 'underscore'
 crypto = require 'crypto'
 nap = require 'nap'
+less = require 'less'
 fs = require 'fs'
-
-linkAttrs = {
-  'href': '',
-  'rel': 'stylesheet',
-  'type': 'text/css'
-}
-link = ['<link', '/>\n']
-scriptAttrs = {
-  'src': ''
-}
-script = ['<script', '></script>']
 
 class Kelvin
 
   constructor: (@isProd) ->
 
   parse: (locals) ->
-    if (@assets)
-      return {
-        assets: @assets
-      }
+    #if (@assets)
+    #  return {
+    #    assets: @assets
+    #  }
     @assets = {}
     for type, obj of @expandAssetGlobs locals.assets
       for name, arr of obj
@@ -55,21 +45,33 @@ class Kelvin
   processPackage: (name, files, type) ->
     output = '\n'
     for file in files
-      contents = fs.readFileSync(path.resolve process.cwd() + '/contents/' + file).toString()
+      source = fs.readFileSync(path.resolve process.cwd() + '/contents/' + file).toString()
+      hash = Kelvin.hashContents source
+      filename = Kelvin.formatFilename file, hash, type
       ext = path.extname file
       if nap.preprocessors[ext]
-        contents = nap.preprocessors[ext] contents, file
-      filename = "/#{file}.#{hashContents(contents)}.css"
-      writeFile filename, contents
-      output += "<link href=\"#{filename}\" rel=\"stylesheet\" />\n"
+        source = nap.preprocessors[ext] source, file
+      #writeFile filename, contents
+      output += Kelvin.formatTag(filename, type) + '\n'
     output
 
-hashContents = (contents) ->
+Kelvin.hashContents = (source) ->
   md5 = crypto.createHash('md5')
-  md5.update contents
+  md5.update source
   md5.digest('hex')
 
-writeFile = (filename, contents) =>
+Kelvin.formatFilename = (filename, hash, type) ->
+  ext = path.extname filename
+  '/' + filename.replace new RegExp(ext + '$'), '-' + hash + '.' + type
+  
+Kelvin.formatTag = (filename, type) ->
+  switch type
+    when 'css'
+      '<link href="' + filename + '" rel="stylesheet" />'
+    when 'js'
+      '<script src="' + filename + '"></script>'
+
+writeFile = (filename, contents) ->
   file = process.cwd() + '/build/' + filename
   dir = path.dirname file
   mkdirp.sync dir, '0755' unless path.existsSync dir

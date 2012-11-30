@@ -4,7 +4,7 @@ path = require 'path'
 hogan = require 'hogan'
 _ = require 'underscore'
 minify = require('html-minifier').minify
-Kelvin = require('./kelvin')
+Kelvin = require './kelvin'
 
 module.exports = (wintersmith, callback) ->
   
@@ -16,8 +16,7 @@ module.exports = (wintersmith, callback) ->
     constructor: (@tpl) ->
 
     render: (locals, callback) ->
-      if (locals.assets)
-        _.extend locals, kelvin.parse(locals)
+      _.extend locals, kelvin.parse(locals)
       try
         rendered = @tpl.render(locals)
         if isProd
@@ -38,5 +37,29 @@ module.exports = (wintersmith, callback) ->
         catch error
           callback error
 
+  class KelvinStyles extends wintersmith.ContentPlugin
+
+    constructor: (@_filename, @_base, @_source) ->
+      @_hash = Kelvin.hashContents(@_source)
+      return
+
+    getFilename: ->
+      Kelvin.formatFilename @_filename, @_hash, 'css'
+
+    render: (locals, contents, templates, callback) ->
+      require('less').render @_source, (error, out) ->
+        if error
+          callback error
+        else
+          callback null, new Buffer out
+
+  KelvinStyles.fromFile = (filename, base, callback) ->
+    fs.readFile path.join(base, filename), (error, buffer) ->
+      if error
+        callback error
+      else
+        callback null, new KelvinStyles filename, base, buffer.toString()
+
   wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
+  wintersmith.registerContentPlugin 'styles', '**/*.less', KelvinStyles
   callback()
