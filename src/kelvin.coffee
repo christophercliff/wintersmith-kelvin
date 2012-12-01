@@ -87,7 +87,7 @@ writeFile = (filename, contents) ->
   fs.writeFileSync file, contents ? ''
 
 hoganPrefix = () ->
-  hoganTemplate = fs.readFileSync(__dirname + '/src/hogan.template.js', 'utf8')
+  hoganTemplate = fs.readFileSync(__dirname + '/hogan.template.js', 'utf8')
   '<script>' + uglify(hoganTemplate)  + '</script>\n'
 
 uglify = (str) ->
