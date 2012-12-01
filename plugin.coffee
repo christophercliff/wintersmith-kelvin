@@ -5,6 +5,7 @@ hogan = require 'hogan'
 _ = require 'underscore'
 minify = require('html-minifier').minify
 Kelvin = require './kelvin'
+OUTPUT = './build'
 
 module.exports = (wintersmith, callback) ->
   
@@ -79,7 +80,27 @@ module.exports = (wintersmith, callback) ->
       else
         callback null, new KelvinJavaScripts filename, base, buffer.toString()
 
-  wintersmith.registerTemplatePlugin '**/*.*(mustache|hogan)', KelvinTemplate
+  class KelvinJavaScriptTemplates extends wintersmith.ContentPlugin
+
+    constructor: (@_filename, @_base, @_source) ->
+      @_hash = Kelvin.hashContents(@_source)
+      return
+
+    getFilename: ->
+      Kelvin.formatFilename @_filename, @_hash, 'js'
+
+    render: (locals, contents, templates, callback) ->
+      callback null, new Buffer 'JST[\'' + Kelvin.templateNamespace(@_filename) + '\'] = new Hogan.Template(' + require('hogan').compile(@_source, { asString: true }) + ');'
+
+  KelvinJavaScriptTemplates.fromFile = (filename, base, callback) ->
+    fs.readFile path.join(base, filename), (error, buffer) ->
+      if error
+        callback error
+      else
+        callback null, new KelvinJavaScriptTemplates filename, base, buffer.toString()
+
+  wintersmith.registerTemplatePlugin '**/*.*mustache', KelvinTemplate
   wintersmith.registerContentPlugin 'css', '**/*.less', KelvinStylesheets
   wintersmith.registerContentPlugin 'js', '**/*.js', KelvinJavaScripts
+  wintersmith.registerContentPlugin 'jst', '**/*.mustache', KelvinJavaScriptTemplates
   callback()

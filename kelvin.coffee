@@ -61,8 +61,8 @@ Kelvin.hashContents = (source) ->
   md5.digest('hex')
 
 Kelvin.formatFilename = (filename, hash, type) ->
-  ext = path.extname filename
-  '/' + filename.replace new RegExp(ext + '$'), '-' + hash + '.' + type
+  ext = if type == 'jst' then 'js' else type
+  '/' + filename + '-' + hash + '.' + ext
   
 Kelvin.formatTag = (filename, type) ->
   switch type
@@ -70,6 +70,12 @@ Kelvin.formatTag = (filename, type) ->
       '<link href="' + filename + '" rel="stylesheet" />'
     when 'js'
       '<script src="' + filename + '"></script>'
+    when 'jst'
+      '<script src="' + filename + '"></script>'
+
+Kelvin.templateNamespace = (filename) ->
+  ns = filename.replace /^assets\/jst\//, ''
+  ns.replace /.mustache$/, ''
 
 writeFile = (filename, contents) ->
   file = process.cwd() + '/build/' + filename
