@@ -1,4 +1,5 @@
-var Hogan = Hogan || {};
+var Hogan = Hogan || {},
+    JST = JST || {};
 
 (function (Hogan, useArrayBuffer) {
   Hogan.Template = function (renderFunc, text, compiler, options) {

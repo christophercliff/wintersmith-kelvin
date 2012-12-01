@@ -88,8 +88,7 @@ writeFile = (filename, contents) ->
 
 hoganPrefix = () ->
   hoganTemplate = fs.readFileSync(__dirname + '/src/hogan.template.js', 'utf8')
-  jstPrefix = 'var JST=JST||{};'
-  '<script>' + uglify(hoganTemplate + jstPrefix)  + '</script>\n'
+  '<script>' + uglify(hoganTemplate)  + '</script>\n'
 
 uglify = (str) ->
   jsp = uglifyjs.parser
