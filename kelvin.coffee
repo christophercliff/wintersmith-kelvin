@@ -6,6 +6,7 @@ crypto = require 'crypto'
 nap = require 'nap'
 less = require 'less'
 fs = require 'fs'
+uglifyjs = require 'uglify-js'
 
 class Kelvin
 
@@ -44,6 +45,8 @@ class Kelvin
 
   processPackage: (name, files, type) ->
     output = '\n'
+    if type == 'jst'
+      output += hoganPrefix()
     for file in files
       source = fs.readFileSync(path.resolve process.cwd() + '/contents/' + file).toString()
       hash = Kelvin.hashContents source
@@ -82,5 +85,18 @@ writeFile = (filename, contents) ->
   dir = path.dirname file
   mkdirp.sync dir, '0755' unless path.existsSync dir
   fs.writeFileSync file, contents ? ''
+
+hoganPrefix = () ->
+  hoganTemplate = fs.readFileSync(__dirname + '/src/hogan.template.js', 'utf8')
+  jstPrefix = 'var JST=JST||{};'
+  '<script>' + uglify(hoganTemplate + jstPrefix)  + '</script>\n'
+
+uglify = (str) ->
+  jsp = uglifyjs.parser
+  pro = uglifyjs.uglify
+  ast = jsp.parse str
+  ast = pro.ast_mangle(ast)
+  ast = pro.ast_squeeze(ast)
+  pro.gen_code(ast)
 
 module.exports = Kelvin
