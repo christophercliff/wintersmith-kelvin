@@ -4,7 +4,7 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
 
 ## Features
 
-- Concatenate and minify client-side JavaScript, CSS (LESS) and JavaScript templates (Mustache).
+- Concatenate and minify client-side JavaScript, CSS (LESS) and compiled JavaScript templates (Hogan.js).
 - Separate modes for development and production.
 - Embed fonts and images in your CSS.
 - Versioned file names.
@@ -12,38 +12,44 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
 
 ## Usage
 
-1. Declare asset packages in an `assets.json` file located in the `./contents` directory.
+1. Add an `assets` configuration object to config.json.
 
 ```json
 {
-  "assets": {
-    "css": {
-      "all": [
-        "./assets/css/*"
-      ]
-    },
-    "js": {
-      "all": [
-        "./assets/js/*"
-      ]
-    },
-    "jst": {
-      "all": [
-        "./assets/jst/*"
-      ]
+  "plugins": [
+    "./node_modules/wintersmith-kelvin/"
+  ],
+  "locals": {
+    "assets": {
+      "css": {
+        "all": [
+          "/assets/css/*"
+        ]
+      },
+      "js": {
+        "all": [
+          "/assets/js/*"
+        ]
+      },
+      "jst": {
+        "all": [
+          "/assets/jst/*"
+        ]
+      }
     }
   }
 }
+
 ````
 
 2. Render asset packages in your templates.
 
-```mustache
+```html
 <html>
     <head>
-        {{& css.all }}
-        {{& js.all }}
-        {{& jst.all }}
+        {{& assets.css.all }}
+        {{& assets.js.all }}
+        {{& assets.jst.all }}
     </head>
 </html>
 ```
