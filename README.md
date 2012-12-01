@@ -45,13 +45,11 @@ A production-ready asset management plugin for [Wintersmith](https://github.com/
 2. Render asset packages in your templates.
 
 ```html
-<html>
-    <head>
-        {{& assets.css.all }}
-        {{& assets.js.all }}
-        {{& assets.jst.all }}
-    </head>
-</html>
+<head>
+    {{& assets.css.all }}
+    {{& assets.js.all }}
+    {{& assets.jst.all }}
+</head>
 ```
 
 ## Development & Production Modes
@@ -81,6 +79,8 @@ Example:
 - Convert images to data URIs
 - Hash file contents into version number and concat w/ filename
 - Minify HTML
+
+Example:
 
 ```html
 <head>
