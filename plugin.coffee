@@ -11,6 +11,8 @@ module.exports = (wintersmith, callback) ->
   
   isProd = false
   kelvin = new Kelvin(isProd)
+  partials = {}
+  partialDir = 'partials'
   
   class KelvinTemplate extends wintersmith.TemplatePlugin
 
@@ -35,6 +37,21 @@ module.exports = (wintersmith, callback) ->
         try
           tpl = hogan.compile contents.toString()
           callback null, new KelvinTemplate tpl
+        catch error
+          callback error
+  
+  class KelvinPartialTemplate extends KelvinTemplate
+  
+  KelvinPartialTemplate.fromFile = (filename, base, callback) ->
+    fs.readFile path.join(base, filename), (error, contents) ->
+      if error then callback error
+      else
+        try
+          ext = path.extname(filename)
+          basename = path.basename(filename, ext)
+          tpl = hogan.compile contents.toString()
+          partials[basename] = tpl
+          callback null, new KelvinPartialTemplate tpl
         catch error
           callback error
 
@@ -100,6 +117,7 @@ module.exports = (wintersmith, callback) ->
         callback null, new KelvinJavaScriptTemplates filename, base, buffer.toString()
 
   wintersmith.registerTemplatePlugin '**/*.*mustache', KelvinTemplate
+  wintersmith.registerTemplatePlugin "**/#{partialDir}/*.*(mustache|hogan)", KelvinPartialTemplate
   wintersmith.registerContentPlugin 'css', '**/*.less', KelvinStylesheets
   wintersmith.registerContentPlugin 'js', '**/*.js', KelvinJavaScripts
   wintersmith.registerContentPlugin 'jst', '**/*.mustache', KelvinJavaScriptTemplates
