@@ -16,10 +16,10 @@ module.exports = (wintersmith, callback) ->
   
   class KelvinTemplate extends wintersmith.TemplatePlugin
 
-    constructor: (@tpl) ->
+    constructor: (@tpl, @contentsDir) ->
 
     render: (locals, callback) ->
-      _.extend locals, kelvin.parse(locals)
+      _.extend locals, kelvin.parse(locals, @contentsDir)
       try
         rendered = @tpl.render(locals)
         if isProd
@@ -31,12 +31,13 @@ module.exports = (wintersmith, callback) ->
         callback error
 
   KelvinTemplate.fromFile = (filename, base, callback) ->
+    contentsDir = base.replace /\/templates$/, '/contents'
     fs.readFile path.join(base, filename), (error, contents) ->
       if error then callback error
       else
         try
           tpl = hogan.compile contents.toString()
-          callback null, new KelvinTemplate tpl
+          callback null, new KelvinTemplate tpl, contentsDir
         catch error
           callback error
   
@@ -118,7 +119,10 @@ module.exports = (wintersmith, callback) ->
 
   wintersmith.registerTemplatePlugin '**/*.*mustache', KelvinTemplate
   wintersmith.registerTemplatePlugin "**/#{partialDir}/*.*(mustache|hogan)", KelvinPartialTemplate
-  wintersmith.registerContentPlugin 'css', '**/*.less', KelvinStylesheets
-  wintersmith.registerContentPlugin 'js', '**/*.js', KelvinJavaScripts
-  wintersmith.registerContentPlugin 'jst', '**/*.mustache', KelvinJavaScriptTemplates
+  
+  unless isProd
+    wintersmith.registerContentPlugin 'css', '**/*.less', KelvinStylesheets
+    wintersmith.registerContentPlugin 'js', '**/*.js', KelvinJavaScripts
+    wintersmith.registerContentPlugin 'jst', '**/*.mustache', KelvinJavaScriptTemplates
+  
   callback()

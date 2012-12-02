@@ -12,13 +12,9 @@ class Kelvin
 
   constructor: (@isProd) ->
 
-  parse: (locals) ->
-    #if (@assets)
-    #  return {
-    #    assets: @assets
-    #  }
+  parse: (locals, contentsDir) ->
     @assets = {}
-    for type, obj of @expandAssetGlobs locals.assets
+    for type, obj of @expandAssetGlobs locals.assets, contentsDir
       for name, arr of obj
         if _.isArray arr
           unless @assets[type]
@@ -28,22 +24,30 @@ class Kelvin
       assets: @assets
     }
 
-  expandAssetGlobs: (assets) ->
+  expandAssetGlobs: (assets, contentsDir) ->
     expandedAssets = { js: {}, css: {}, jst: {} }
-    appDir = process.cwd().replace(/\\/g, '\/')
-    appDir += '/contents/'
     for key, obj of assets
       for pkg, patterns of assets[key]
         matches = []
         for pattern in patterns
-          fnd = glob.sync path.resolve("#{appDir}#{pattern}").replace(/\\/g, '\/')
+          fnd = glob.sync path.resolve("#{contentsDir}/#{pattern}").replace(/\\/g, '\/')
           matches = matches.concat(fnd)
         matches = _.uniq _.flatten matches
-        matches = (file.replace(appDir, '').replace(/^\//, '') for file in matches)
+        matches = (file.replace(contentsDir, '') for file in matches)
         expandedAssets[key][pkg] = matches
     expandedAssets
 
   processPackage: (name, files, type) ->
+    ###
+    DEV
+    - append tag
+    PROD
+    - combine
+    - transform
+    - data uri
+    - write
+    - append tag
+    ###
     output = '\n'
     if type == 'jst'
       output += hoganPrefix()
@@ -52,9 +56,6 @@ class Kelvin
       hash = Kelvin.hashContents source
       filename = Kelvin.formatFilename file, hash, type
       ext = path.extname file
-      if nap.preprocessors[ext]
-        source = nap.preprocessors[ext] source, file
-      #writeFile filename, contents
       output += Kelvin.formatTag(filename, type) + '\n'
     output
 
@@ -65,7 +66,7 @@ Kelvin.hashContents = (source) ->
 
 Kelvin.formatFilename = (filename, hash, type) ->
   ext = if type == 'jst' then 'js' else type
-  '/' + filename + '-' + hash + '.' + ext
+  filename + '-' + hash + '.' + ext
   
 Kelvin.formatTag = (filename, type) ->
   switch type
