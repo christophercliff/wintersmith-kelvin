@@ -1,6 +1,7 @@
 {
   "plugins": ["./../"],
   "locals": {
+    "cdn": "abc.cloudfront.net",
     "assets": {
       "css": {
         "all": [

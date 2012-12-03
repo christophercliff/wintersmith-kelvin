@@ -14,6 +14,7 @@
     "moment": "~1.7.2",
     "html-minifier": "0.4.5",
     "glob": "~3.1.14",
-    "uglify-js": "1"
+    "uglify-js": "1",
+    "sqwish": "~0.2.0"
   }
 }

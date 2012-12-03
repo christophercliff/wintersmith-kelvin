@@ -7,6 +7,9 @@ nap = require 'nap'
 less = require 'less'
 fs = require 'fs'
 uglifyjs = require 'uglify-js'
+sqwish = require 'sqwish'
+async = require 'async'
+hoganTemplate = fs.readFileSync(__dirname + '/hogan.template.js', 'utf8')
 
 class Kelvin
 
@@ -14,7 +17,9 @@ class Kelvin
 
   parse: (locals, contentsDir) ->
     @assets = {}
-    for type, obj of @expandAssetGlobs locals.assets, contentsDir
+    @contentsDir = contentsDir
+    @cdn = locals.cdn
+    for type, obj of @expandAssetGlobs locals.assets
       for name, arr of obj
         if _.isArray arr
           unless @assets[type]
@@ -24,40 +29,60 @@ class Kelvin
       assets: @assets
     }
 
-  expandAssetGlobs: (assets, contentsDir) ->
+  expandAssetGlobs: (assets) ->
     expandedAssets = { js: {}, css: {}, jst: {} }
     for key, obj of assets
       for pkg, patterns of assets[key]
         matches = []
         for pattern in patterns
-          fnd = glob.sync path.resolve("#{contentsDir}/#{pattern}").replace(/\\/g, '\/')
+          fnd = glob.sync path.resolve("#{@contentsDir}/#{pattern}").replace(/\\/g, '\/')
           matches = matches.concat(fnd)
         matches = _.uniq _.flatten matches
-        matches = (file.replace(contentsDir, '') for file in matches)
         expandedAssets[key][pkg] = matches
     expandedAssets
 
   processPackage: (name, files, type) ->
-    ###
-    DEV
-    - append tag
-    PROD
-    - combine
-    - transform
-    - data uri
-    - write
-    - append tag
-    ###
     output = '\n'
-    if type == 'jst'
-      output += hoganPrefix()
-    for file in files
-      source = fs.readFileSync(path.resolve process.cwd() + '/contents/' + file).toString()
+    if @isProd
+      source = @transform files, type
       hash = Kelvin.hashContents source
-      filename = Kelvin.formatFilename file, hash, type
-      ext = path.extname file
+      filename = ''
+      if @cdn
+        filename += '//' + @cdn
+      filename += '/assets/' + type + '/' + Kelvin.formatFilename name, hash, type
       output += Kelvin.formatTag(filename, type) + '\n'
+    else
+      if type == 'jst'
+        output += hoganPrefix()
+      for file in files
+        source = fs.readFileSync(@contentsDir + file, 'utf8')
+        hash = Kelvin.hashContents source
+        filename = Kelvin.formatFilename file, hash, type
+        output += Kelvin.formatTag(filename, type) + '\n'
     output
+  
+  transform: (files, type) ->
+    arr = []
+    if type is 'jst'
+      arr.push hoganTemplate
+    for filename in files
+      ext = path.extname filename
+      contents = fs.readFileSync filename, 'utf8'
+      if nap.preprocessors[ext]
+        arr.push nap.preprocessors[ext](contents, filename)
+      else if nap.templateParsers[ext]
+        arr.push Kelvin.templateDefinition(contents, filename.replace(@contentsDir, ''))
+      else
+        arr.push contents
+    source = ''
+    if type is 'js' or type is 'jst'
+      source = uglify(arr.join(''))
+    else if type is 'css'
+      source = sqwish.minify(arr.join(''))
+    source
+  
+  write: (source, name, callback) ->
+    callback null, source, name
 
 Kelvin.hashContents = (source) ->
   md5 = crypto.createHash('md5')
@@ -77,8 +102,11 @@ Kelvin.formatTag = (filename, type) ->
     when 'jst'
       '<script src="' + filename + '"></script>'
 
+Kelvin.templateDefinition = (source, filename) ->
+  'JST[\'' + Kelvin.templateNamespace(filename) + '\'] = new Hogan.Template(' + require('hogan').compile(source, { asString: true }) + ');'
+
 Kelvin.templateNamespace = (filename) ->
-  ns = filename.replace /^assets\/jst\//, ''
+  ns = filename.replace /^\/?assets\/jst\//, ''
   ns.replace /.mustache$/, ''
 
 writeFile = (filename, contents) ->
@@ -88,7 +116,6 @@ writeFile = (filename, contents) ->
   fs.writeFileSync file, contents ? ''
 
 hoganPrefix = () ->
-  hoganTemplate = fs.readFileSync(__dirname + '/hogan.template.js', 'utf8')
   '<script>' + uglify(hoganTemplate)  + '</script>\n'
 
 uglify = (str) ->

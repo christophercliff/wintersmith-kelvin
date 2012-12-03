@@ -9,7 +9,7 @@ OUTPUT = './build'
 
 module.exports = (wintersmith, callback) ->
   
-  isProd = false
+  isProd = true
   kelvin = new Kelvin(isProd)
   partials = {}
   partialDir = 'partials'
