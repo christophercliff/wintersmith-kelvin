@@ -59,8 +59,8 @@ class Kelvin
       for file in files
         source = fs.readFileSync(file, 'utf8')
         hash = Kelvin.hashContents source
-        filename = Kelvin.formatFilename file, hash, type
-        output += Kelvin.formatTag(filename, type) + '\n'
+        f = Kelvin.formatFilename file.replace(@contentsDir, ''), hash, type
+        output += Kelvin.formatTag(f, type) + '\n'
     output
   
   transform: (files, type) ->
