@@ -17,5 +17,9 @@
     "uglify-js": "1",
     "sqwish": "~0.2.0",
     "mkdirp": "~0.3.4"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/christophercliff/wintersmith-kelvin"
   }
 }
