@@ -47,15 +47,18 @@ class Kelvin
       source = @transform files, type
       hash = Kelvin.hashContents source
       filename = ''
+      formattedFilename = '/assets/' + type + '/' + Kelvin.formatFilename name, hash, type
+      writeFilename = @contentsDir.replace(/contents$/, 'build') + formattedFilename
+      writeFile(writeFilename, source)
       if @cdn
         filename += '//' + @cdn
-      filename += '/assets/' + type + '/' + Kelvin.formatFilename name, hash, type
+      filename += formattedFilename
       output += Kelvin.formatTag(filename, type) + '\n'
     else
       if type == 'jst'
         output += hoganPrefix()
       for file in files
-        source = fs.readFileSync(@contentsDir + file, 'utf8')
+        source = fs.readFileSync(file, 'utf8')
         hash = Kelvin.hashContents source
         filename = Kelvin.formatFilename file, hash, type
         output += Kelvin.formatTag(filename, type) + '\n'
@@ -80,9 +83,6 @@ class Kelvin
     else if type is 'css'
       source = sqwish.minify(arr.join(''))
     source
-  
-  write: (source, name, callback) ->
-    callback null, source, name
 
 Kelvin.hashContents = (source) ->
   md5 = crypto.createHash('md5')
@@ -110,10 +110,9 @@ Kelvin.templateNamespace = (filename) ->
   ns.replace /.mustache$/, ''
 
 writeFile = (filename, contents) ->
-  file = process.cwd() + '/build/' + filename
-  dir = path.dirname file
+  dir = path.dirname filename
   mkdirp.sync dir, '0755' unless path.existsSync dir
-  fs.writeFileSync file, contents ? ''
+  fs.writeFileSync filename, contents ? ''
 
 hoganPrefix = () ->
   '<script>' + uglify(hoganTemplate)  + '</script>\n'
