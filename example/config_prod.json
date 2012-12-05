@@ -2,6 +2,7 @@
   "plugins": ["./../"],
   "ignore": ["**/*.less", "**/*.js", "**/*.mustache"],
   "locals": {
+    "mode": "production",
     "cdn": "abc.cloudfront.net",
     "assets": {
       "css": {

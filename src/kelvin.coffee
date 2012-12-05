@@ -14,19 +14,18 @@ hoganTemplate = fs.readFileSync(__dirname + '/hogan.template.js', 'utf8')
 
 class Kelvin
 
-  constructor: (@isProd, @contentsDir, @buildDir) ->
+  constructor: (@isProd, @contentsDir, @buildDir, @cdn) ->
 
-  parse: (locals) ->
-    @assets = {}
-    @cdn = locals.cdn
-    for type, obj of @expandAssetGlobs locals.assets
+  parse: (assets) ->
+    _assets = {}
+    for type, obj of @expandAssetGlobs assets
       for name, arr of obj
         if _.isArray arr
-          unless @assets[type]
-            @assets[type] = {}
-          @assets[type][name] = @processPackage name, arr, type
+          unless _assets[type]
+            _assets[type] = {}
+          _assets[type][name] = @processPackage name, arr, type
     return {
-      assets: @assets
+      assets: _assets
     }
 
   expandAssetGlobs: (assets) ->
@@ -111,7 +110,7 @@ Kelvin.templateNamespace = (filename) ->
 
 writeFile = (filename, contents) ->
   dir = path.dirname filename
-  mkdirp.sync dir, '0755' unless path.existsSync dir
+  mkdirp.sync dir, '0755' unless fs.existsSync dir
   fs.writeFileSync filename, contents ? ''
 
 hoganDevPrefix = () ->
