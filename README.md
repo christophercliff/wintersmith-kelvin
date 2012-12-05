@@ -28,11 +28,9 @@ Then add the plugin to your `config.json`:
 
 ## Usage
 
-Kelvin uses a combination of a ContentPlugins and TemplatePlugins to 
+### Configuration
 
 Use the `locals` object in the [Wintersmith config](https://github.com/jnordberg/wintersmith#config) to configure Kelvin.
-
-### Options
 
 <table>
     <tr>
@@ -41,23 +39,25 @@ Use the `locals` object in the [Wintersmith config](https://github.com/jnordberg
         <th>Description</th>
     </tr>
     <tr>
-        <td>`assets`</td>
-        <td>`{ "css": {}, "js": {}, "jst": {} }`</td>
+        <td>assets</td>
+        <td>{}</td>
         <td>The assets object containing your package declarations.</td>
     </tr>
     <tr>
-        <td>`mode`</td>
-        <td>`development`</td>
-        <td>E.g. `development` or `production`.</td>
+        <td>mode</td>
+        <td>development</td>
+        <td>E.g. "development" or "production".</td>
     </tr>
     <tr>
-        <td>`cdn`</td>
-        <td>`undefined`</td>
-        <td>If defined, will prepend a CDN host to asset references in production mode. E.g. `foo.cloudfront.net`. Kelvin will generate protocol-relative URLs.</td>
+        <td>cdn</td>
+        <td>undefined</td>
+        <td>If defined, will prepend a CDN host to asset references in production mode. E.g. "foo.cloudfront.net". Kelvin will generate protocol-relative URLs.</td>
       </tr>
 </table>
 
-Kelvin will convert your package declarations into `<script>` and `<link>` tags to be used in template files. For example:
+### Rendering
+
+Kelvin will convert your package declarations into `<script>` and `<link>` tags to be rendered in template files. Using Mustache syntax:
 
 ```mustache
     {{& assets.css.all }}
