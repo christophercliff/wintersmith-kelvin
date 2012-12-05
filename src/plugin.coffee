@@ -9,17 +9,17 @@ OUTPUT = './build'
 
 module.exports = (wintersmith, callback) ->
   
-  isProd = true
-  kelvin = new Kelvin(isProd)
+  isProd = false
   partials = {}
   partialDir = 'partials'
   
   class KelvinTemplate extends wintersmith.TemplatePlugin
 
     constructor: (@tpl, @contentsDir) ->
+      @kelvin = new Kelvin isProd, @contentsDir, @contentsDir.replace(/contents$/, 'build')
 
     render: (locals, callback) ->
-      _.extend locals, kelvin.parse(locals, @contentsDir)
+      _.extend locals, @kelvin.parse(locals)
       try
         rendered = @tpl.render(locals)
         if isProd
@@ -116,7 +116,7 @@ module.exports = (wintersmith, callback) ->
         callback error
       else
         callback null, new KelvinJavaScriptTemplates filename, base, buffer.toString()
-
+  
   wintersmith.registerTemplatePlugin '**/*.*mustache', KelvinTemplate
   wintersmith.registerTemplatePlugin "**/#{partialDir}/*.*(mustache|hogan)", KelvinPartialTemplate
   

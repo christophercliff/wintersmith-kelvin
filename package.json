@@ -15,6 +15,7 @@
     "html-minifier": "0.4.5",
     "glob": "~3.1.14",
     "uglify-js": "1",
-    "sqwish": "~0.2.0"
+    "sqwish": "~0.2.0",
+    "mkdirp": "~0.3.4"
   }
 }

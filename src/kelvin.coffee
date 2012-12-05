@@ -9,15 +9,15 @@ fs = require 'fs'
 uglifyjs = require 'uglify-js'
 sqwish = require 'sqwish'
 async = require 'async'
+mkdirp = require 'mkdirp'
 hoganTemplate = fs.readFileSync(__dirname + '/hogan.template.js', 'utf8')
 
 class Kelvin
 
-  constructor: (@isProd) ->
+  constructor: (@isProd, @contentsDir, @buildDir) ->
 
-  parse: (locals, contentsDir) ->
+  parse: (locals) ->
     @assets = {}
-    @contentsDir = contentsDir
     @cdn = locals.cdn
     for type, obj of @expandAssetGlobs locals.assets
       for name, arr of obj
@@ -56,7 +56,7 @@ class Kelvin
       output += Kelvin.formatTag(filename, type) + '\n'
     else
       if type == 'jst'
-        output += hoganPrefix()
+        output += hoganDevPrefix()
       for file in files
         source = fs.readFileSync(file, 'utf8')
         hash = Kelvin.hashContents source
@@ -114,7 +114,7 @@ writeFile = (filename, contents) ->
   mkdirp.sync dir, '0755' unless path.existsSync dir
   fs.writeFileSync filename, contents ? ''
 
-hoganPrefix = () ->
+hoganDevPrefix = () ->
   '<script>' + uglify(hoganTemplate)  + '</script>\n'
 
 uglify = (str) ->

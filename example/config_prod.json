@@ -1,6 +1,8 @@
 {
   "plugins": ["./../"],
+  "ignore": ["**/*.less", "**/*.js", "**/*.mustache"],
   "locals": {
+    "cdn": "abc.cloudfront.net",
     "assets": {
       "css": {
         "all": [
