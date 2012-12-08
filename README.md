@@ -91,7 +91,7 @@ Production mode is meant to be run programatically. Files are transformed, combi
 <script src="//abc.cloudfront.net/assets/jst/all-b098f354b09fe46fe4f125b5b66ba481.js"></script>
 ```
 
-## Contributors
+## Acknowledgements
 
 Kelvin was inspired by and incorporates code from the following projects:
 
