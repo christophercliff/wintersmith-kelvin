@@ -18,6 +18,13 @@
     "mkdirp": "~0.3.4",
     "hogan": "~1.0.5"
   },
+  "devDependencies": {
+    "mocha": "~1.7.4",
+    "should": "~1.2.1"
+  },
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha --compilers coffee:coffee-script"
+  },
   "repository": {
     "type": "git",
     "url": "http://github.com/christophercliff/wintersmith-kelvin"
