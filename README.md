@@ -1,8 +1,8 @@
-[![Build Status](https://travis-ci.org/christophercliff/wintersmith-kelvin.png)](https://travis-ci.org/christophercliff/wintersmith-kelvin)
-
 # wintersmith-kelvin
 
 A production-ready asset management plugin for [Wintersmith](https://github.com/jnordberg/wintersmith).
+
+[![Build Status](https://travis-ci.org/christophercliff/wintersmith-kelvin.png)](https://travis-ci.org/christophercliff/wintersmith-kelvin)
 
 ## Features
 
