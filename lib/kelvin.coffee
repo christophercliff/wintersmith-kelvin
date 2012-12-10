@@ -70,18 +70,59 @@ class Kelvin
     for filename in files
       ext = path.extname filename
       contents = fs.readFileSync filename, 'utf8'
-      if nap.preprocessors[ext]
-        arr.push nap.preprocessors[ext](contents, filename)
-      else if nap.templateParsers[ext]
-        arr.push Kelvin.templateDefinition(contents, filename.replace(@contentsDir, ''))
-      else
-        arr.push contents
+      switch type
+        when 'css'
+          arr.push @embed nap.preprocessors[ext](contents, filename)
+        when 'jst'
+          arr.push Kelvin.templateDefinition(contents, filename.replace(@contentsDir, ''))
+        else
+          arr.push contents
     source = ''
     if type is 'js' or type is 'jst'
       source = uglify(arr.join(''))
     else if type is 'css'
       source = sqwish.minify(arr.join(''))
     source
+
+  embed: (contents) ->
+    mimes =
+      '.gif': 'image/gif'
+      '.png': 'image/png'
+      '.jpg': 'image/jpeg'
+      '.jpeg': 'image/jpeg'
+      '.svg': 'image/svg+xml'
+      '.ttf': 'font/truetype;charset=utf-8'
+      '.woff': 'font/woff;charset=utf-8'
+    offset = 0
+    offsetContents = contents.substring(offset, contents.length)
+    
+    return contents unless offsetContents.match(/url/g)?
+    
+    for i in [0..offsetContents.match(/url/g).length]
+      start = offsetContents.indexOf('url(') + 4 + offset
+      end = contents.substring(start, contents.length).indexOf(')') + start
+      filename = _.trim _.trim(contents.substring(start, end), '"'), "'"
+      
+      continue unless filename.match(/\.embed\.|\/embed\//g)?
+      
+      filename = @contentsDir + '/' + filename.replace /^\//, ''
+      mime = mimes[path.extname filename]
+      
+      if mime?
+        if path.existsSync filename
+          base64Str = fs.readFileSync(path.resolve filename).toString('base64')
+          newUrl = "data:#{mime};base64,#{base64Str}"
+          contents = _.splice(contents, start, end - start, newUrl)
+          end = start + newUrl.length + 4
+        else
+          throw new Error 'Tried to embed data-uri, but could not find file ' + filename
+      else
+        end += 4
+
+      offset = end
+      offsetContents = contents.substring(offset, contents.length)
+    
+    contents
 
 Kelvin.hashContents = (source) ->
   md5 = crypto.createHash('md5')
