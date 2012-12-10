@@ -1,11 +1,11 @@
 
-fs =  require 'fs'
+async = require 'async'
+fs = require 'fs'
 path = require 'path'
 hogan = require 'hogan'
 _ = require 'underscore'
 minify = require('html-minifier').minify
 Kelvin = require './kelvin'
-OUTPUT = './build'
 
 module.exports = (wintersmith, callback) ->
   
@@ -17,19 +17,25 @@ module.exports = (wintersmith, callback) ->
     constructor: (@tpl, @contentsDir, @buildDir) ->
 
     render: (locals, callback) ->
+      self = @
       isProd = locals.mode is 'production'
-      if locals.assets
-        kelvin = new Kelvin isProd, @contentsDir, @buildDir, locals.cdn
-        _.extend locals, kelvin.parse(locals.assets)
-      try
-        rendered = @tpl.render(locals)
-        if isProd
-          rendered = minify rendered, {
-            collapseWhitespace: true
-          }
-        callback null, new Buffer rendered
-      catch error
-        callback error
+      async.series [
+        (c) ->
+          if locals.assets
+            kelvin = new Kelvin isProd, self.contentsDir, self.buildDir, locals.cdn
+            kelvin.parse locals.assets, c
+          else
+            c null, {}
+      ], (error, assets) ->
+        try
+          rendered = self.tpl.render(_.extend locals, assets)
+          if isProd
+            rendered = minify rendered, {
+              collapseWhitespace: true
+            }
+          callback null, new Buffer rendered
+        catch error
+          callback error
 
   KelvinTemplate.fromFile = (filename, base, callback) ->
     contentsDir = base.replace /\/templates$/, '/contents'
