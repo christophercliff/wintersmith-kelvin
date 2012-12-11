@@ -16,7 +16,7 @@ class Kelvin
 
   constructor: (@isProd, @contentsDir, @buildDir, @cdn) ->
 
-  parse: (assets, callback) ->
+  parse: (assets) ->
     _assets = {}
     for type, obj of @expandAssetGlobs assets
       for name, arr of obj
@@ -24,8 +24,9 @@ class Kelvin
           unless _assets[type]
             _assets[type] = {}
           _assets[type][name] = @processPackage name, arr, type
-    callback null,
+    return {
       assets: _assets
+    }
 
   expandAssetGlobs: (assets) ->
     expandedAssets = { js: {}, css: {}, jst: {} }
