@@ -2,7 +2,7 @@
 
 A production-ready asset management plugin for [Wintersmith](https://github.com/jnordberg/wintersmith).
 
-[![Build Status](https://travis-ci.org/christophercliff/wintersmith-kelvin.png)](https://travis-ci.org/christophercliff/wintersmith-kelvin)
+[![Build Status](https://secure.travis-ci.org/christophercliff/wintersmith-kelvin.png?branch=master)](https://travis-ci.org/christophercliff/wintersmith-kelvin)
 
 ## Features
 
