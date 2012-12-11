@@ -22,7 +22,7 @@ module.exports = (wintersmith, callback) ->
         kelvin = new Kelvin isProd, @contentsDir, @buildDir, locals.cdn
         _.extend locals, kelvin.parse(locals.assets)
       try
-        rendered = @tpl.render(locals)
+        rendered = @tpl.render(locals, partials)
         if isProd
           rendered = minify rendered, {
             collapseWhitespace: true
