@@ -34,7 +34,7 @@ class Kelvin
       for pkg, patterns of assets[key]
         matches = []
         for pattern in patterns
-          fnd = glob.sync path.resolve("#{@contentsDir}/#{pattern}").replace(/\\/g, '\/')
+          fnd = glob.sync path.resolve("#{@contentsDir}#{pattern}").replace(/\\/g, '\/')
           matches = matches.concat(fnd)
         matches = _.uniq _.flatten matches
         expandedAssets[key][pkg] = matches
@@ -102,13 +102,10 @@ class Kelvin
       start = offsetContents.indexOf('url(') + 4 + offset
       end = contents.substring(start, contents.length).indexOf(')') + start
       filename = _.trim _.trim(contents.substring(start, end), '"'), "'"
-      
-      continue unless filename.match(/\.embed\.|\/embed\//g)?
-      
       filename = @contentsDir + '/' + filename.replace /^\//, ''
       mime = mimes[path.extname filename]
       
-      if mime?
+      if mime? and filename.match(/\.embed\.|\/embed\//g)?
         if path.existsSync filename
           base64Str = fs.readFileSync(path.resolve filename).toString('base64')
           newUrl = "data:#{mime};base64,#{base64Str}"
