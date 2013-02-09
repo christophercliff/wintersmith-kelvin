@@ -1,6 +1,6 @@
 {
   "name": "wintersmith-kelvin",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "author": "Christopher Cliff <ctcliff@gmail.com>",
   "description": "A production-ready asset management plugin for Wintersmith.",
   "license": "MIT",
