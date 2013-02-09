@@ -109,7 +109,7 @@ module.exports = (wintersmith, callback) ->
       Kelvin.formatFilename @_filename, @_hash, 'js'
 
     render: (locals, contents, templates, callback) ->
-      callback null, new Buffer 'JST[\'' + Kelvin.templateNamespace(@_filename) + '\'] = new Hogan.Template(' + require('hogan').compile(@_source, { asString: true }) + ');'
+      callback null, new Buffer 'JST[\'' + Kelvin.templateNamespace(@_filename) + '\'] = new Hogan.Template(' + hogan.compile(@_source, { asString: true }) + ');'
 
   KelvinJavaScriptTemplates.fromFile = (filename, base, callback) ->
     fs.readFile path.join(base, filename), (error, buffer) ->
