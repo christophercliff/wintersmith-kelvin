@@ -1,7 +1,7 @@
 
 fs =  require 'fs'
 path = require 'path'
-hogan = require 'hogan'
+hogan = require 'hogan.js'
 _ = require 'underscore'
 minify = require('html-minifier').minify
 Kelvin = require './kelvin'
